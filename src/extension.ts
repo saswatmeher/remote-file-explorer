@@ -24,47 +24,68 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 
 	// Register the command to open the file explorer view
-	const openInFileExplorer = vscode.commands.registerCommand('fileExplorer.openInFileExplorer', (uri: vscode.Uri) => {
+	const openInFileExplorer = vscode.commands.registerCommand('fileExplorer.openInFileExplorer', async (uri?: vscode.Uri) => {
 		// Ask the user to input a folder path
 
 		// const folderPath = await vscode.window.showInputBox({
 		// 	prompt: 'Enter the folder path to open in File Explorer',
 		// 	placeHolder: '/path/to/folder'
 		// });
-		const folderPath = uri.fsPath;
+		let folderUri: vscode.Uri | undefined = uri;
 
-		if (!folderPath) {
-			vscode.window.showErrorMessage('No folder path provided.');
-			return;
-		}
+		if (!folderUri) {
+			const inputPath = await vscode.window.showInputBox({
+				prompt: 'Enter a folder path',
+				placeHolder: '/path/to/folder',
+			});
 
-		if (!fs.existsSync(folderPath) || !fs.lstatSync(folderPath).isDirectory()) {
-			vscode.window.showErrorMessage('Invalid folder path. Please provide a valid directory.');
-			return;
-		}
-
-		// Create and show a new Webview Panel
-		const panel = vscode.window.createWebviewPanel(
-			'fileExplorer',
-			`File Explorer: ${path.basename(folderPath)}`,
-			vscode.ViewColumn.Two,
-			{
-				enableScripts: true,
-				retainContextWhenHidden: true
+			if (!inputPath) {
+				vscode.window.showWarningMessage('No folder path entered.');
+				return;
 			}
-		);
 
-		// Get the files and folders in the directory
-		const items = fs.readdirSync(folderPath).map(item => {
-			const itemPath = path.join(folderPath, item);
-			return {
-				name: item,
-				isDirectory: fs.lstatSync(itemPath).isDirectory()
-			};
-		});
+			// Convert user input to Uri
+			folderUri = vscode.Uri.file(inputPath);
 
-		// Set the HTML content for the Webview Panel
-		panel.webview.html = getWebviewContent(items);
+		}
+
+		try {
+			const stat = await vscode.workspace.fs.stat(folderUri);
+			if (stat.type !== vscode.FileType.Directory) {
+				vscode.window.showErrorMessage('The provided path is not a folder.');
+				return;
+			}
+
+			vscode.window.showInformationMessage(`Folder selected: ${folderUri.fsPath}`);
+
+			const folderPath = folderUri.fsPath;
+			// Create and show a new Webview Panel
+			const panel = vscode.window.createWebviewPanel(
+				'fileExplorer',
+				`File Explorer: ${path.basename(folderPath)}`,
+				vscode.ViewColumn.Two,
+				{
+					enableScripts: true,
+					retainContextWhenHidden: true
+				}
+			);
+
+			// Get the files and folders in the directory
+			const items = fs.readdirSync(folderPath).map(item => {
+				const itemPath = path.join(folderPath, item);
+				return {
+					name: item,
+					isDirectory: fs.lstatSync(itemPath).isDirectory()
+				};
+			});
+
+			// Set the HTML content for the Webview Panel
+			panel.webview.html = getWebviewContent(items);
+		} catch (err) {
+			vscode.window.showErrorMessage('Invalid or inaccessible folder path.');
+		}
+
+		
 	});
 
 	context.subscriptions.push(openInFileExplorer);
