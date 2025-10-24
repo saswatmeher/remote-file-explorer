@@ -9,15 +9,26 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onView:fileExplorer"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "file-explorer.helloWorld",
-        "title": "Hello World"
+        "command": "fileExplorer.openInFileExplorer",
+        "title": "Open in File Explorer"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "fileExplorer.openInFileExplorer",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
