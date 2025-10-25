@@ -18,6 +18,10 @@
       {
         "command": "fileExplorer.openInFileExplorer",
         "title": "Open in File Explorer"
+      },
+      {
+        "command": "fileExplorer.openFolderContaining",
+        "title": "Open Folder Containing"
       }
     ],
     "menus": {
@@ -25,7 +29,11 @@
         {
           "command": "fileExplorer.openInFileExplorer",
           "when": "explorerResourceIsFolder",
-          "group": "navigation"
+          "group": "fileExplorer@1"
+        },
+        {
+          "command": "fileExplorer.openFolderContaining",
+          "group": "fileExplorer@2"
         }
       ]
     }
