@@ -40,7 +40,24 @@ export function showFileExplorerPanel(folderPath: string, extensionUri: vscode.U
                 break;
             case 'openFolder':
                 const subFolderPath = path.join(folderPath, message.item);
-                await vscode.commands.executeCommand('remoteFileExplorer.openInremoteFileExplorer', vscode.Uri.file(subFolderPath));
+                if (message.newTab) {
+                    // Open in new tab if shift was pressed
+                    await vscode.commands.executeCommand('remoteFileExplorer.openInremoteFileExplorer', vscode.Uri.file(subFolderPath));
+                } else {
+                    // Update current panel if shift wasn't pressed
+                    const items = fs.readdirSync(subFolderPath).map(item => {
+                        const itemPath = path.join(subFolderPath, item);
+                        return {
+                            name: item,
+                            isDirectory: fs.lstatSync(itemPath).isDirectory()
+                        };
+                    });
+                    // Update panel title and content
+                    panel.title = `Remote File Explorer: ${path.basename(subFolderPath)}`;
+                    panel.webview.html = getWebviewContent(items, panel.webview, extensionUri);
+                    // Update the current folder path (closure variable)
+                    folderPath = subFolderPath;
+                }
                 break;
         }
     });

@@ -125,7 +125,12 @@
 		const item = e.target.closest('.item');
 		if (item) {
 			if (item.dataset.isDirectory === 'true') {
-				vscode.postMessage({ command: 'openFolder', item: item.dataset.name, isDirectory: item.dataset.isDirectory === 'true' });
+				vscode.postMessage({ 
+					command: 'openFolder', 
+					item: item.dataset.name, 
+					isDirectory: item.dataset.isDirectory === 'true',
+					newTab: e.shiftKey // Pass whether shift key was pressed
+				});
 			} else {
 				vscode.postMessage({ command: 'openFile', item: item.dataset.name, isDirectory: item.dataset.isDirectory === 'true' });
 			}
