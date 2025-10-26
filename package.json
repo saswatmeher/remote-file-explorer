@@ -1,7 +1,7 @@
 {
-  "name": "file-explorer",
-  "displayName": "file-explorer",
-  "description": "A more familiar file explorer for VS Code.",
+  "name": "remote-file-explorer",
+  "displayName": "remote-file-explorer",
+  "description": "A more familiar file explorer for remote files/folders.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.105.0"
@@ -10,30 +10,30 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:fileExplorer"
+    "onView:remoteFileExplorer"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "fileExplorer.openInFileExplorer",
-        "title": "Open in File Explorer"
+        "command": "remoteFileExplorer.openInremoteFileExplorer",
+        "title": "Open in Remote File Explorer"
       },
       {
-        "command": "fileExplorer.openFolderContaining",
-        "title": "Open Folder Containing"
+        "command": "remoteFileExplorer.openInRemoteContainingFolder",
+        "title": "Open Remote Containing Folder"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "fileExplorer.openInFileExplorer",
+          "command": "remoteFileExplorer.openInremoteFileExplorer",
           "when": "explorerResourceIsFolder",
-          "group": "fileExplorer@1"
+          "group": "remoteFileExplorer@1"
         },
         {
-          "command": "fileExplorer.openFolderContaining",
-          "group": "fileExplorer@2"
+          "command": "remoteFileExplorer.openInRemoteContainingFolder",
+          "group": "remoteFileExplorer@2"
         }
       ]
     }
