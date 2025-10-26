@@ -18,6 +18,19 @@ body {
 	background: var(--vscode-editor-background);
 	border-bottom: 1px solid rgba(128,128,128,0.06);
 }
+.nav-controls {
+	display: flex;
+	gap: 4px;
+}
+.view-controls {
+	display: flex;
+	gap: 4px;
+	margin-left: 16px;
+}
+.btn[disabled] {
+	opacity: 0.5;
+	cursor: default;
+}
 .btn {
 	padding: 6px 8px;
 	border-radius: 4px;
@@ -81,6 +94,17 @@ body {
 .item .name {
 	overflow: hidden;
 	text-overflow: ellipsis;
+	max-width: 100%;
+	white-space: nowrap; /* keep single-line in list view by default */
+}
+
+/* In grid view allow names to wrap onto multiple lines so long names are readable */
+#items.grid .item .name {
+	white-space: normal;
+	overflow: visible;
+	text-overflow: clip;
+	word-break: break-word;
+	/* allow the name to take up to two lines visually without breaking layout too much */
 	max-width: 100%;
 }
 

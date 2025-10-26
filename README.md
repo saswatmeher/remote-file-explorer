@@ -1,71 +1,76 @@
-# file-explorer README
+# Remote File Explorer — VS Code Extension
 
-This is the README for your extension "file-explorer". After writing up a brief description, we recommend including the following sections.
+Remote File Explorer is a lightweight VS Code extension that opens a browsable file explorer in a Webview panel. It provides a compact visual file browser with grid/list views, zoom controls, context menu actions, and navigation (back/forward/up) similar to a desktop file manager.
 
-## Features
+![How to open the file explorer](assets/demo-ss-1.png)
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Key features
 
-For example if there is an image subfolder under your extension project workspace:
+- Grid and list views for browsing files and folders
+- Zoom controls (increase/decrease thumbnail size)
+- Context menu (Open file / Open folder)
+- Double-click behavior:
+	- Double-click a folder: opens in the same webview panel
+	- Shift + double-click a folder: opens in a new panel/tab
+- Back / Forward / Up navigation with history tracking
+- Open files in the main editor from the webview
 
-\!\[feature X\]\(images/feature-x.png\)
+## Commands
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+The primary (and most convenient) way to open the Remote File Explorer is via the Explorer context menu — right-click any file or folder in the VS Code Explorer and choose "Open in Remote File Explorer" (this runs the `remoteFileExplorer.openInremoteFileExplorer` command for the selected resource).
 
-## Requirements
+The extension exposes these commands (use the Command Palette or bind keys):
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- `remoteFileExplorer.openInremoteFileExplorer` — Open a specific folder in the Remote File Explorer (prompts for a path if none provided)
+- `remoteFileExplorer.openInRemoteContainingFolder` — Open the containing folder of the currently active file
 
-## Extension Settings
+## Usage
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+1. Open the Command Palette (Ctrl+Shift+P) and run `Remote File Explorer: Open in remoteFileExplorer` (or use the `remoteFileExplorer.openInremoteFileExplorer` command).
+2. Enter a folder path or pass a folder URI when invoking the command.
+3. Use the toolbar at the top of the webview to switch between list/grid, zoom, or navigate:
+	 - ← Back: go to previous folder in history
+	 - → Forward: go to next folder in history (if any)
+	 - ↑ Up: go to the parent folder
+4. Double-click a folder to open it in the same panel. Hold Shift while double-clicking to open the folder in a new panel/tab.
+5. Double-click a file or choose Open from the context menu to open it in the editor.
 
-For example:
+## Developer notes
 
-This extension contributes the following settings:
+- Project structure (relevant files):
+	- `src/extension.ts` — activation and command registration
+	- `src/fileExplorerPanel.ts` — creates the webview panel and manages navigation/history
+	- `src/webviewContent.ts` — builds the webview HTML
+	- `media/webview.js` — client-side webview JS (UI interactions)
+	- `media/styles.css` — webview styling
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- If you modify the webview assets, remember to use `webview.asWebviewUri` in `webviewContent.ts` so VS Code serves them correctly.
 
-## Known Issues
+## Developing & testing
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+1. Install dependencies and open this folder in VS Code.
+2. Run the extension in the Extension Development Host (F5 in VS Code).
+3. Use the Command Palette in the host window to invoke the commands above.
 
-## Release Notes
+Quick checks:
 
-Users appreciate release notes as you update your extension.
+- Ensure `tsconfig.json` and `package.json` are configured correctly for the extension host.
+- When editing TypeScript sources, build/typecheck to catch issues early.
 
-### 1.0.0
+## Troubleshooting
 
-Initial release of ...
+- If the webview shows blank content after changes, ensure the webview script/style URIs are generated with `webview.asWebviewUri(...)` and that `localResourceRoots` includes the `media` folder.
+- If navigation buttons don't update, check the messages sent from the extension to the webview (`postMessage`) and that the webview listens for `updateNavigation` messages.
+- For file access errors, ensure the provided path exists and the extension has permission to read it.
 
-### 1.0.1
+## Contributing
 
-Fixed issue #.
+Contributions are welcome. Open issues or PRs for bugs and feature requests. Keep changes focused and include tests where relevant.
 
-### 1.1.0
+## License
 
-Added features X, Y, and Z.
+This project is licensed under the MIT License — see the `LICENSE` file at the project root for the full text.
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+If you'd like, I can also add a short 'Try it' example to the README that includes sample commands and screenshots (if you provide images).

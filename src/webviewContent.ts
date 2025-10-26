@@ -30,8 +30,15 @@ export function getWebviewContent(
 		</head>
 		<body>
 			<div class="toolbar">
-				<button id="listBtn" class="btn" title="List view">List</button>
-				<button id="gridBtn" class="btn active" title="Grid view">Grid</button>
+				<div class="nav-controls">
+					<button id="backBtn" class="btn" title="Go back">←</button>
+					<button id="forwardBtn" class="btn" title="Go forward">→</button>
+					<button id="upBtn" class="btn" title="Go to parent folder">↑</button>
+				</div>
+				<div class="view-controls">
+					<button id="listBtn" class="btn" title="List view">List</button>
+					<button id="gridBtn" class="btn active" title="Grid view">Grid</button>
+				</div>
 				<div class="controls">
 					<button id="zoomOut" class="btn" title="Zoom out">-</button>
 					<span id="zoomLabel">100%</span>

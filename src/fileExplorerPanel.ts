@@ -4,6 +4,10 @@ import * as fs from 'fs';
 import { getWebviewContent } from './webviewContent';
 
 export function showFileExplorerPanel(folderPath: string, extensionUri: vscode.Uri) {
+    // Navigation history
+    const history: string[] = [folderPath];
+    let currentIndex = 0;
+
     const panel = vscode.window.createWebviewPanel(
         'remoteFileExplorer',
         `Remote File Explorer: ${path.basename(folderPath)}`,
@@ -15,20 +19,45 @@ export function showFileExplorerPanel(folderPath: string, extensionUri: vscode.U
         }
     );
 
-    // Handle messages from the webview
-    panel.webview.onDidReceiveMessage(async (message) => {
-        switch (message.command) {
-            case 'requestRefresh':
-                // Get the updated files and folders in the directory
-                const updatedItems = fs.readdirSync(folderPath).map(item => {
-                    const itemPath = path.join(folderPath, item);
+    // Function to navigate to a folder and update the view
+    async function navigateToFolder(newPath: string, addToHistory: boolean = true) {
+        try {
+            const stat = await vscode.workspace.fs.stat(vscode.Uri.file(newPath));
+            if (stat.type === vscode.FileType.Directory) {
+                if (addToHistory) {
+                    // Remove any forward history when adding new path
+                    history.splice(currentIndex + 1);
+                    history.push(newPath);
+                    currentIndex = history.length - 1;
+                }
+                folderPath = newPath;
+                const items = fs.readdirSync(newPath).map(item => {
+                    const itemPath = path.join(newPath, item);
                     return {
                         name: item,
                         isDirectory: fs.lstatSync(itemPath).isDirectory()
                     };
                 });
-                // Update the webview content
-                panel.webview.html = getWebviewContent(updatedItems, panel.webview, extensionUri);
+                panel.title = `Remote File Explorer: ${path.basename(newPath)}`;
+                panel.webview.html = getWebviewContent(items, panel.webview, extensionUri);
+                
+                // Update navigation buttons state
+                panel.webview.postMessage({
+                    command: 'updateNavigation',
+                    canGoBack: currentIndex > 0,
+                    canGoForward: currentIndex < history.length - 1
+                });
+            }
+        } catch (err) {
+            vscode.window.showErrorMessage('Invalid or inaccessible folder path.');
+        }
+    }
+
+    // Handle messages from the webview
+    panel.webview.onDidReceiveMessage(async (message) => {
+        switch (message.command) {
+            case 'requestRefresh':
+                await navigateToFolder(folderPath, false);
                 break;
             case 'openFile':
                 const filePath = path.join(folderPath, message.item);
@@ -38,39 +67,42 @@ export function showFileExplorerPanel(folderPath: string, extensionUri: vscode.U
                     preserveFocus: false
                 });
                 break;
+            case 'navigate':
+                switch (message.direction) {
+                    case 'back':
+                        if (currentIndex > 0) {
+                            currentIndex--;
+                            await navigateToFolder(history[currentIndex], false);
+                        }
+                        break;
+                    case 'forward':
+                        if (currentIndex < history.length - 1) {
+                            currentIndex++;
+                            await navigateToFolder(history[currentIndex], false);
+                        }
+                        break;
+                    case 'up':
+                        const parentPath = path.dirname(folderPath);
+                        if (parentPath !== folderPath) {
+                            await navigateToFolder(parentPath);
+                        }
+                        break;
+                }
+                break;
             case 'openFolder':
                 const subFolderPath = path.join(folderPath, message.item);
                 if (message.newTab) {
                     // Open in new tab if shift was pressed
                     await vscode.commands.executeCommand('remoteFileExplorer.openInremoteFileExplorer', vscode.Uri.file(subFolderPath));
                 } else {
-                    // Update current panel if shift wasn't pressed
-                    const items = fs.readdirSync(subFolderPath).map(item => {
-                        const itemPath = path.join(subFolderPath, item);
-                        return {
-                            name: item,
-                            isDirectory: fs.lstatSync(itemPath).isDirectory()
-                        };
-                    });
-                    // Update panel title and content
-                    panel.title = `Remote File Explorer: ${path.basename(subFolderPath)}`;
-                    panel.webview.html = getWebviewContent(items, panel.webview, extensionUri);
-                    // Update the current folder path (closure variable)
-                    folderPath = subFolderPath;
+                    // Open in the same panel and track history
+                    await navigateToFolder(subFolderPath);
                 }
                 break;
         }
     });
 
-    // Get the files and folders in the directory
-    const items = fs.readdirSync(folderPath).map(item => {
-        const itemPath = path.join(folderPath, item);
-        return {
-            name: item,
-            isDirectory: fs.lstatSync(itemPath).isDirectory()
-        };
-    });
-
-    // Set the HTML content for the Webview Panel
-    panel.webview.html = getWebviewContent(items, panel.webview, extensionUri);
+    // Initialize view and navigation state
+    // Use navigateToFolder so history and navigation buttons are correctly initialized
+    navigateToFolder(folderPath, false);
 }

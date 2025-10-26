@@ -3,12 +3,29 @@
 	let selectedItem = null;
 	let zoom = 100;
 
+	// Get UI elements
 	const listBtn = document.getElementById('listBtn');
 	const gridBtn = document.getElementById('gridBtn');
 	const itemsEl = document.getElementById('items');
 	const zoomIn = document.getElementById('zoomIn');
 	const zoomOut = document.getElementById('zoomOut');
 	const zoomLabel = document.getElementById('zoomLabel');
+	const backBtn = document.getElementById('backBtn');
+	const forwardBtn = document.getElementById('forwardBtn');
+	const upBtn = document.getElementById('upBtn');
+
+	// Navigation buttons event listeners
+	backBtn.addEventListener('click', () => {
+		vscode.postMessage({ command: 'navigate', direction: 'back' });
+	});
+
+	forwardBtn.addEventListener('click', () => {
+		vscode.postMessage({ command: 'navigate', direction: 'forward' });
+	});
+
+	upBtn.addEventListener('click', () => {
+		vscode.postMessage({ command: 'navigate', direction: 'up' });
+	});
 
 	function setView(mode) {
 		if (mode === 'grid') {
@@ -44,6 +61,11 @@
 			case 'refresh':
 				// Ask extension for updated items
 				vscode.postMessage({ command: 'requestRefresh' });
+				break;
+			case 'updateNavigation':
+				// Update navigation buttons state
+				backBtn.disabled = !message.canGoBack;
+				forwardBtn.disabled = !message.canGoForward;
 				break;
 		}
 	});
