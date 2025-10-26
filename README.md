@@ -2,7 +2,7 @@
 
 Remote File Explorer is a lightweight VS Code extension that opens a browsable file explorer in a Webview panel. It provides a compact visual file browser with grid/list views, zoom controls, context menu actions, and navigation (back/forward/up) similar to a desktop file manager.
 
-![How to open the file explorer](assets/demo-ss-1.png)
+![How to open the file explorer](https://github.com/saswatmeher/remote-file-explorer/blob/main/assets/demo-ss-1.png)
 
 ## Key features
 
