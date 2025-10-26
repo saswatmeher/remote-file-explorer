@@ -35,6 +35,12 @@
           "command": "remoteFileExplorer.openInRemoteContainingFolder",
           "group": "remoteFileExplorer@2"
         }
+      ],
+      "editor/title/context": [
+        {
+          "command": "remoteFileExplorer.openInRemoteContainingFolder",
+          "group": "navigation@1"
+        }
       ]
     }
   },
