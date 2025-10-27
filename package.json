@@ -3,7 +3,8 @@
   "displayName": "remote-file-explorer",
   "description": "A more familiar file explorer for remote files/folders.",
   "publisher": "SaswatMeher",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.1",
+  "repository": "https://github.com/saswatmeher/remote-file-explorer",
   "engines": {
     "vscode": "^1.105.0"
   },
