@@ -1,7 +1,11 @@
 (function() {
 	const vscode = acquireVsCodeApi();
-	let selectedItem = null;
+	const selectedItems = new Set();
 	let zoom = 100;
+	let isDragging = false;
+	let dragStartPos = { x: 0, y: 0 };
+	let selectionBox = null;
+	let lastSelectedItem = null; // Track last selected item for shift selection
 
 	// Get UI elements
 	const listBtn = document.getElementById('listBtn');
@@ -96,9 +100,19 @@
 		it.addEventListener('mouseleave', () => it.style.background = 'transparent');
 		it.addEventListener('click', () => {
 			menu.style.display = 'none';
-			if (currentItem) {
-				vscode.postMessage({ command: cmd, item: currentItem.dataset.name, isDirectory: currentItem.dataset.isDirectory === 'true' });
-			}
+			
+			// Get all selected items
+			const selectedFiles = Array.from(selectedItems).map(item => ({
+				name: item.dataset.name,
+				isDirectory: item.dataset.isDirectory === 'true'
+			}));
+
+			// Send command with selected items
+			vscode.postMessage({ 
+				command: cmd, 
+				items: selectedFiles,
+				position: { x: menu.offsetLeft, y: menu.offsetTop }
+			});
 		});
 		menu.appendChild(it);
 	}
@@ -109,36 +123,259 @@
 		const item = e.target.closest('.item');
 		if (item) {
 			e.preventDefault();
-			if (selectedItem) selectedItem.classList.remove('selected');
-			item.classList.add('selected');
-			selectedItem = item;
-			currentItem = item;
-			clearMenu();
-			const isDir = item.dataset.isDirectory === 'true';
-			if (isDir) {
-				addMenuItem('Open', 'openFolder');
-			} else {
-				addMenuItem('Open', 'openFile');
+			
+			// If clicking on an unselected item, select it
+			if (!selectedItems.has(item)) {
+				selectItem(item);
 			}
-			// position with some padding to avoid edges
+
+			clearMenu();
+
+			// Get all selected items
+			const selectedFiles = Array.from(selectedItems).map(item => ({
+				name: item.dataset.name,
+				isDirectory: item.dataset.isDirectory === 'true'
+			}));
+
+			// Add menu items based on selection
+			if (selectedFiles.length === 1) {
+				// Single item selected
+				if (selectedFiles[0].isDirectory) {
+					addMenuItem('Open', 'openFolder');
+				} else {
+					addMenuItem('Open', 'openFile');
+				}
+			}
+
+			// Common operations for both single and multiple selections
+			addMenuItem('Copy', 'copy');
+			addMenuItem('Cut', 'cut');
+			addMenuItem('Delete', 'delete');
+
+			// Add paste option if there's something in clipboard
+			vscode.postMessage({ command: 'checkClipboard' });
+
+			// Position menu
 			const x = Math.min(window.innerWidth - 180, e.clientX);
 			const y = Math.min(window.innerHeight - 10, e.clientY);
 			menu.style.left = x + 'px';
 			menu.style.top = y + 'px';
 			menu.style.display = 'block';
 		} else {
-			menu.style.display = 'none';
+			// Right click on empty space
+			e.preventDefault();
+			clearMenu();
+			addMenuItem('Paste', 'paste');
+			
+			const x = Math.min(window.innerWidth - 180, e.clientX);
+			const y = Math.min(window.innerHeight - 10, e.clientY);
+			menu.style.left = x + 'px';
+			menu.style.top = y + 'px';
+			menu.style.display = 'block';
 		}
 	});
 
 	// Hide menu when clicking outside
+	// Create selection box for drag selection
+	function createSelectionBox() {
+		const box = document.createElement('div');
+		box.id = 'selection-box';
+		box.style.position = 'fixed';
+		box.style.border = '1px solid var(--vscode-focusBorder)';
+		box.style.backgroundColor = 'rgba(var(--vscode-focusBorder), 0.1)';
+		box.style.pointerEvents = 'none';
+		box.style.display = 'none';
+		document.body.appendChild(box);
+		return box;
+	}
+
+	function updateSelectionBox(e) {
+		// Calculate the selection box dimensions
+		const x = Math.min(e.clientX, dragStartPos.x);
+		const y = Math.min(e.clientY, dragStartPos.y);
+		const width = Math.abs(e.clientX - dragStartPos.x);
+		const height = Math.abs(e.clientY - dragStartPos.y);
+		
+		// Apply the dimensions to the selection box
+		selectionBox.style.left = x + 'px';
+		selectionBox.style.top = y + 'px';
+		selectionBox.style.width = width + 'px';
+		selectionBox.style.height = height + 'px';
+
+		// Show a preview of what will be selected
+		const rect = selectionBox.getBoundingClientRect();
+		const items = document.querySelectorAll('.item');
+		
+		items.forEach(item => {
+			const itemRect = item.getBoundingClientRect();
+			const isIntersecting = !(rect.right < itemRect.left || 
+				rect.left > itemRect.right || 
+				rect.bottom < itemRect.top || 
+				rect.top > itemRect.bottom);
+
+			// Add 'selecting' class for visual feedback during drag
+			if (isIntersecting) {
+				item.classList.add('selecting');
+			} else {
+				item.classList.remove('selecting');
+			}
+		});
+	}
+
+	function getItemsInRange(startItem, endItem) {
+		const items = Array.from(document.querySelectorAll('.item'));
+		const startIndex = items.indexOf(startItem);
+		const endIndex = items.indexOf(endItem);
+		
+		if (startIndex === -1 || endIndex === -1) return [];
+		
+		const start = Math.min(startIndex, endIndex);
+		const end = Math.max(startIndex, endIndex);
+		
+		return items.slice(start, end + 1);
+	}
+
+	function selectItem(item, options = { addToSelection: false, isShiftSelect: false }) {
+		if (!options.addToSelection && !options.isShiftSelect) {
+			// Clear previous selection if not adding to it
+			selectedItems.forEach(i => i.classList.remove('selected'));
+			selectedItems.clear();
+		}
+
+		if (options.isShiftSelect && lastSelectedItem) {
+			// First clear any previous selections if not using Ctrl
+			if (!options.addToSelection) {
+				selectedItems.forEach(i => i.classList.remove('selected'));
+				selectedItems.clear();
+			}
+
+			// Select all items in range
+			const itemsInRange = getItemsInRange(lastSelectedItem, item);
+			itemsInRange.forEach(rangeItem => {
+				rangeItem.classList.add('selected');
+				selectedItems.add(rangeItem);
+			});
+		} else {
+			item.classList.add('selected');
+			selectedItems.add(item);
+			lastSelectedItem = item;
+		}
+	}
+
+	// Initialize selection box
+	selectionBox = createSelectionBox();
+
+	// Mouse events for drag selection
+	document.addEventListener('mousedown', (e) => {
+		if (e.button === 0) { // Left click
+			isDragging = true;
+			dragStartPos = { x: e.clientX, y: e.clientY };
+			
+			// Prevent default text selection
+			e.preventDefault();
+			
+			// If clicking on empty space and not using Ctrl/Shift, clear selection
+			if (!e.target.closest('.item') && !e.ctrlKey && !e.shiftKey) {
+				selectedItems.forEach(item => item.classList.remove('selected'));
+				selectedItems.clear();
+			}
+		}
+	});
+
+	// Prevent text selection while dragging
+	document.addEventListener('selectstart', (e) => {
+		if (isDragging) {
+			e.preventDefault();
+		}
+	});
+
+	document.addEventListener('mousemove', (e) => {
+		if (isDragging) {
+			if (!selectionBox.style.display || selectionBox.style.display === 'none') {
+				// Only start showing selection box if mouse has moved a minimum distance
+				const dx = Math.abs(e.clientX - dragStartPos.x);
+				const dy = Math.abs(e.clientY - dragStartPos.y);
+				if (dx > 5 || dy > 5) {
+					selectionBox.style.display = 'block';
+				}
+			}
+			updateSelectionBox(e);
+		}
+	});
+
+	document.addEventListener('mouseup', (e) => {
+		if (isDragging) {
+			isDragging = false;
+			if (selectionBox) {
+				selectionBox.style.display = 'none';
+				
+				// If selection box was actually shown (drag occurred), finalize the selection
+				if (selectionBox.style.display === 'block') {
+					const rect = selectionBox.getBoundingClientRect();
+					const items = document.querySelectorAll('.item');
+					
+					// If not using Ctrl, clear previous selection
+					if (!e.ctrlKey) {
+						selectedItems.forEach(item => item.classList.remove('selected'));
+						selectedItems.clear();
+					}
+					
+					// Select all items within the selection box
+					items.forEach(item => {
+						const itemRect = item.getBoundingClientRect();
+						if (!(rect.right < itemRect.left || 
+							rect.left > itemRect.right || 
+							rect.bottom < itemRect.top || 
+							rect.top > itemRect.bottom)) {
+							item.classList.add('selected');
+							selectedItems.add(item);
+						}
+					});
+					
+					// Update last selected item for shift-selection
+					if (selectedItems.size > 0) {
+						lastSelectedItem = Array.from(selectedItems).pop();
+					}
+				}
+			}
+		}
+	});
+
+	// Handle clicks on items
 	document.addEventListener('click', (e) => {
-		if (!e.target.closest('#context-menu')) { menu.style.display = 'none'; }
+		if (!e.target.closest('#context-menu')) { 
+			menu.style.display = 'none';
+		}
+		
 		const item = e.target.closest('.item');
 		if (item) {
-			if (selectedItem) selectedItem.classList.remove('selected');
-			item.classList.add('selected');
-			selectedItem = item;
+			if (e.shiftKey) {
+				// Shift+click for range selection
+				selectItem(item, { 
+					addToSelection: e.ctrlKey, 
+					isShiftSelect: true 
+				});
+			} else if (e.ctrlKey) {
+				// Toggle selection with Ctrl+click
+				if (selectedItems.has(item)) {
+					item.classList.remove('selected');
+					selectedItems.delete(item);
+					// Update lastSelectedItem if we're deselecting it
+					if (lastSelectedItem === item) {
+						lastSelectedItem = Array.from(selectedItems).pop() || null;
+					}
+				} else {
+					selectItem(item, { addToSelection: true });
+				}
+			} else {
+				// Normal click
+				selectItem(item);
+			}
+		} else if (!e.ctrlKey && !e.shiftKey) {
+			// Click on empty space clears selection unless Ctrl or Shift is held
+			selectedItems.forEach(i => i.classList.remove('selected'));
+			selectedItems.clear();
+			lastSelectedItem = null;
 		}
 	});
 
