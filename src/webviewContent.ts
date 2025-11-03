@@ -28,7 +28,7 @@ export function getWebviewContent(
 			<title>File Explorer</title>
 			<link rel="stylesheet" href="${cssUri}">
 		</head>
-		<body>
+		<body tabindex="0">
 			<div class="toolbar">
 				<div class="nav-controls">
 					<button id="backBtn" class="btn" title="Go back">←</button>
@@ -46,7 +46,7 @@ export function getWebviewContent(
 				</div>
 			</div>
 
-			<div id="items" class="wrap grid">
+			<div id="items" class="wrap grid" tabindex="-1">
 				${listItems}
 			</div>
 

@@ -1,9 +1,9 @@
 {
   "name": "remote-file-explorer",
   "displayName": "remote-file-explorer",
-  "description": "A more familiar file explorer for remote files/folders.",
+  "description": "Explore remote files visually in VS Code — finally, an “Open Containing Folder” that works over SSH!",
   "publisher": "SaswatMeher",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "repository": "https://github.com/saswatmeher/remote-file-explorer",
   "engines": {
     "vscode": "^1.105.0"

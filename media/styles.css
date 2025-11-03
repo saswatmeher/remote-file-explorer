@@ -9,6 +9,15 @@ body {
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
+	outline: none; /* Remove focus outline */
+}
+
+body:focus {
+	outline: none;
+}
+
+#items:focus {
+	outline: none;
 }
 .toolbar {
 	display: flex;
@@ -79,6 +88,35 @@ body {
 	gap: 6px;
 	padding: 8px;
 	text-align: center;
+}
+
+/* Prevent I-beam cursor and text selection on items */
+.item,
+.item .thumb,
+.item .name {
+	cursor: default;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+/* Keyboard focus indicator */
+.item.focused {
+	outline: 2px solid var(--vscode-focusBorder);
+	outline-offset: -2px;
+}
+
+/* Ensure focused takes precedence visually */
+.item.focused:not(.selected) {
+	background-color: var(--vscode-list-focusBackground, var(--vscode-list-hoverBackground));
+}
+
+/* Preview state during drag selection */
+.item.selecting {
+	background-color: var(--vscode-list-hoverBackground);
+	outline: 1px solid var(--vscode-focusBorder);
+	outline-offset: -1px;
 }
 
 .item .thumb {

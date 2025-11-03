@@ -5,6 +5,41 @@ All notable changes to the Remote File Explorer extension will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-11-03
+
+### Added
+- Multi-selection support:
+  - Ctrl+click to toggle selection
+  - Shift+click to select ranges
+  - Drag-select with a selection box, including add-to-selection with Ctrl
+- Keyboard navigation and shortcuts:
+  - Arrow keys to move focus (grid and list aware)
+  - Shift + arrows to extend selection; Ctrl + arrows to move focus only
+  - Space toggles selection of focused item
+  - Enter opens files/folders (Shift+Enter opens folder in new tab)
+  - Ctrl+C / Ctrl+X / Ctrl+V for Copy / Cut / Paste
+  - Delete to delete selected items (with confirmation)
+  - Ctrl+A select all, Escape clears selection, F2 renames single selection
+- Context menu enhancements with grouped operations and separators:
+  - Single selection: Open, Rename | Copy, Cut, Paste | Delete
+  - Multi selection: Copy, Cut, Paste | Delete
+- File operations implemented:
+  - Copy/Cut/Paste (name conflict handling: “(1)”, “(2)”, …)
+  - Delete (recursive for folders) with confirmation
+  - Rename with validation and collision checks
+- “Open” from context menu (file/folder) behaves the same as double-click
+
+### Changed
+- Webview UX improvements:
+  - Prevent I‑beam cursor and disable text selection on items
+  - Focus management so keyboard events always work (tabindex + autofocus)
+  - Visible keyboard focus ring; visible drag-select preview state
+- Drag selection persists after mouseup (no accidental clearing on click)
+
+### Fixed
+- Keyboard events not firing previously due to lack of focus in the webview
+- Drag selection sometimes cleared by the subsequent click event
+
 ## [1.0.0] - 2025-10-27
 
 ### Added

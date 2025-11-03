@@ -2,6 +2,12 @@
 
 Remote File Explorer is a lightweight VS Code extension that opens a browsable file explorer in a Webview panel. It provides a compact visual file browser similar to a desktop file manager.
 
+⚠️ Disclaimer
+
+I’ve never written a line of JavaScript in my life.
+Every bit of code you see here was gently whispered into existence by Copilot.
+I just clicked Accept Suggestion with conviction.
+
 ![How to open the file explorer](https://raw.githubusercontent.com/saswatmeher/remote-file-explorer/refs/heads/main/assets/demo-ss-1.png)
 
 ## Key features
@@ -27,11 +33,6 @@ The extension exposes these commands (use the Command Palette or bind keys):
 These features are planned for future releases:
 
 ### High Priority
-- **File Management Operations**
-  - Multiple file/folder selection (Click + Shift/Ctrl)
-  - Cut, Copy, Paste operations
-  - Delete files/folders with confirmation
-  - Rename files/folders
 - **Thumbnail Support**
   - Implement FreeDesktop thumbnail specifications
   - Generate thumbnails for images, PDFs, and videos
@@ -44,7 +45,6 @@ These features are planned for future releases:
 - List view columns (size, date modified, etc.)
 - File type filtering
 - Search within current folder
-- Keyboard shortcuts for all operations
 - Sort by (Date, Name, etc...)
 
 ## Contributing
