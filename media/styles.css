@@ -125,9 +125,15 @@ body:focus {
 	display:flex;
 	align-items:center;
 	justify-content:center;
-	font-size: calc(var(--item-size) * 0.5);
+	font-size: calc(var(--item-size) * 0.6);
 	background: rgba(128,128,128,0.04);
 	border-radius: 6px;
+}
+
+/* Icon sizing for the ::before pseudo-elements */
+.item .thumb::before {
+	font-size: calc(var(--item-size) * 0.6);
+	line-height: 1;
 }
 .item .name {
 	overflow: hidden;

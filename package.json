@@ -1,12 +1,13 @@
 {
   "name": "remote-file-explorer",
-  "displayName": "remote-file-explorer",
-  "description": "Explore remote files visually in VS Code — finally, an “Open Containing Folder” that works over SSH!",
+  "displayName": "Remote File Explorer",
+  "description": "Explore remote files visually in VS Code — finally, an \"Open Containing Folder\" that works over SSH!",
   "publisher": "SaswatMeher",
   "version": "0.2.0",
+  "icon": "assets/extention_icon.png",
   "repository": "https://github.com/saswatmeher/remote-file-explorer",
   "engines": {
-    "vscode": "^1.105.0"
+    "vscode": "^1.37.0"
   },
   "categories": [
     "Other"
@@ -23,7 +24,7 @@
       },
       {
         "command": "remoteFileExplorer.openInRemoteContainingFolder",
-        "title": "Open Remote Containing Folder"
+        "title": "Open Containing Remote Folder"
       }
     ],
     "menus": {
@@ -55,7 +56,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.105.0",
+    "@types/vscode": "^1.37.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@typescript-eslint/eslint-plugin": "^8.45.0",

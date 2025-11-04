@@ -1,6 +1,6 @@
 # Remote File Explorer — VS Code Extension
 
-Remote File Explorer is a lightweight VS Code extension that opens a browsable file explorer in a Webview panel. It provides a compact visual file browser similar to a desktop file manager.
+VS Code doesn’t support “Open Containing Folder” in remote SSH sessions — Remote File Explorer fills that gap with a lightweight, Webview-based file browser that feels just like a desktop file manager.
 
 ⚠️ Disclaimer
 
@@ -54,7 +54,3 @@ Contributions are welcome. Open issues or PRs for bugs and feature requests. Kee
 ## License
 
 This project is licensed under the MIT License — see the `LICENSE` file at the project root for the full text.
-
----
-
-If you'd like, I can also add a short 'Try it' example to the README that includes sample commands and screenshots (if you provide images).

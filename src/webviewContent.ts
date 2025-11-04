@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getFileIcon } from './fileIcons';
+import { getFileIconClass } from './fileIcons';
 
 export function getWebviewContent(
     items: { name: string; isDirectory: boolean }[],
@@ -10,13 +10,14 @@ export function getWebviewContent(
         .map(
             (item) => `
 		<div class="item ${item.isDirectory ? 'folder' : 'file'}" data-name="${item.name}" data-is-directory="${item.isDirectory}">
-			<div class="thumb">${item.isDirectory ? '📂' : getFileIcon(item.name)}</div>
+			<div class="thumb ${item.isDirectory ? 'icon-folder' : getFileIconClass(item.name)}"></div>
 			<div class="name">${item.name}</div>
 		</div>`
         )
         .join('');
 
     const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'styles.css'));
+    const fileIconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'file-icons.css'));
     const jsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'webview.js'));
     const nonce = getNonce();
 
@@ -27,6 +28,7 @@ export function getWebviewContent(
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>File Explorer</title>
 			<link rel="stylesheet" href="${cssUri}">
+			<link rel="stylesheet" href="${fileIconsCssUri}">
 		</head>
 		<body tabindex="0">
 			<div class="toolbar">
