@@ -128,12 +128,26 @@ body:focus {
 	font-size: calc(var(--item-size) * 0.6);
 	background: rgba(128,128,128,0.04);
 	border-radius: 6px;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
 }
 
 /* Icon sizing for the ::before pseudo-elements */
 .item .thumb::before {
 	font-size: calc(var(--item-size) * 0.6);
 	line-height: 1;
+}
+
+/* Hide icon when thumbnail is present */
+.item.has-thumbnail .thumb::before {
+	content: none;
+}
+
+/* Thumbnail specific styling */
+.item.has-thumbnail .thumb {
+	background-color: #fff;
+	border: 1px solid rgba(128,128,128,0.2);
 }
 .item .name {
 	overflow: hidden;
@@ -142,14 +156,20 @@ body:focus {
 	white-space: nowrap; /* keep single-line in list view by default */
 }
 
-/* In grid view allow names to wrap onto multiple lines so long names are readable */
+/* In grid view allow names to wrap onto multiple lines (max 3 rows) with ellipsis */
 #items.grid .item .name {
 	white-space: normal;
-	overflow: visible;
-	text-overflow: clip;
 	word-break: break-word;
-	/* allow the name to take up to two lines visually without breaking layout too much */
 	max-width: 100%;
+	/* Limit to 3 lines using line-clamp */
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 1.3em;
+	max-height: calc(1.3em * 3); /* 3 lines max */
 }
 
 .item:hover { background-color: var(--vscode-list-hoverBackground); }

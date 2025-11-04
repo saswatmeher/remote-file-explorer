@@ -236,7 +236,9 @@
 		const startIndex = items.indexOf(startItem);
 		const endIndex = items.indexOf(endItem);
 		
-		if (startIndex === -1 || endIndex === -1) return [];
+		if (startIndex === -1 || endIndex === -1) {
+			return [];
+		}
 		
 		const start = Math.min(startIndex, endIndex);
 		const end = Math.max(startIndex, endIndex);
@@ -457,7 +459,9 @@
 
 	function getGridColumns() {
 		const items = getAllItems();
-		if (items.length === 0) return 1;
+		if (items.length === 0) {
+			return 1;
+		}
 		
 		const firstItem = items[0];
 		const firstItemRect = firstItem.getBoundingClientRect();
@@ -476,7 +480,9 @@
 
 	function navigateByArrow(direction, ctrlKey, shiftKey) {
 		const items = getAllItems();
-		if (items.length === 0) return;
+		if (items.length === 0) {
+			return;
+		}
 
 		// If no item is focused, focus the first one
 		if (!focusedItem) {
@@ -488,7 +494,9 @@
 		}
 
 		const currentIndex = getItemIndex(focusedItem);
-		if (currentIndex === -1) return;
+		if (currentIndex === -1) {
+			return;
+		}
 
 		let newIndex = currentIndex;
 		const isGridView = itemsEl.classList.contains('grid');

@@ -1,18 +1,25 @@
 import * as vscode from 'vscode';
 import { getFileIconClass } from './fileIcons';
+import * as path from 'path';
 
 export function getWebviewContent(
-    items: { name: string; isDirectory: boolean }[],
+    items: { name: string; isDirectory: boolean; fullPath?: string; thumbnailUri?: string }[],
     webview: vscode.Webview,
     extensionUri: vscode.Uri
 ): string {
     const listItems = items
         .map(
-            (item) => `
-		<div class="item ${item.isDirectory ? 'folder' : 'file'}" data-name="${item.name}" data-is-directory="${item.isDirectory}">
-			<div class="thumb ${item.isDirectory ? 'icon-folder' : getFileIconClass(item.name)}"></div>
+            (item) => {
+                const iconClass = item.isDirectory ? 'icon-folder' : getFileIconClass(item.name);
+                const hasThumbnail = item.thumbnailUri ? 'has-thumbnail' : '';
+                const thumbnailStyle = item.thumbnailUri ? `style="background-image: url('${item.thumbnailUri}')"` : '';
+                
+                return `
+		<div class="item ${item.isDirectory ? 'folder' : 'file'} ${hasThumbnail}" data-name="${item.name}" data-is-directory="${item.isDirectory}">
+			<div class="thumb ${iconClass}" ${thumbnailStyle}></div>
 			<div class="name">${item.name}</div>
-		</div>`
+		</div>`;
+            }
         )
         .join('');
 

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { getWebviewContent } from './webviewContent';
+import { supportsThumbnail, getThumbnailUri } from './thumbnailGenerator';
 
 // Helper function to copy directory recursively
 function copyDirectoryRecursive(source: string, destination: string) {
@@ -37,7 +38,10 @@ export function showFileExplorerPanel(folderPath: string, extensionUri: vscode.U
         {
             enableScripts: true,
             retainContextWhenHidden: true,
-            localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')]
+            localResourceRoots: [
+                vscode.Uri.joinPath(extensionUri, 'media'),
+                vscode.Uri.file(folderPath) // Allow loading files from current directory
+            ]
         }
     );
 
@@ -53,13 +57,38 @@ export function showFileExplorerPanel(folderPath: string, extensionUri: vscode.U
                     currentIndex = history.length - 1;
                 }
                 folderPath = newPath;
-                const items = fs.readdirSync(newPath).map(item => {
+                
+                // Update localResourceRoots to allow access to current folder
+                (panel as any).webview.options = {
+                    ...panel.webview.options,
+                    localResourceRoots: [
+                        vscode.Uri.joinPath(extensionUri, 'media'),
+                        vscode.Uri.file(newPath)
+                    ]
+                };
+                
+                // Get items with thumbnail support
+                const itemNames = fs.readdirSync(newPath);
+                const items = itemNames.map(item => {
                     const itemPath = path.join(newPath, item);
+                    const isDirectory = fs.lstatSync(itemPath).isDirectory();
+                    
+                    let thumbnailUri: string | undefined;
+                    if (!isDirectory && supportsThumbnail(itemPath)) {
+                        const thumbUri = getThumbnailUri(itemPath, panel.webview);
+                        if (thumbUri) {
+                            thumbnailUri = thumbUri.toString();
+                        }
+                    }
+                    
                     return {
                         name: item,
-                        isDirectory: fs.lstatSync(itemPath).isDirectory()
+                        isDirectory,
+                        fullPath: itemPath,
+                        thumbnailUri
                     };
                 });
+                
                 panel.title = `Remote File Explorer: ${path.basename(newPath)}`;
                 panel.webview.html = getWebviewContent(items, panel.webview, extensionUri);
                 
