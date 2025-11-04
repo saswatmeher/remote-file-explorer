@@ -3,11 +3,11 @@
   "displayName": "Remote File Explorer",
   "description": "Explore remote files visually in VS Code — finally, an \"Open Containing Folder\" that works over SSH!",
   "publisher": "SaswatMeher",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "icon": "assets/extention_icon.png",
   "repository": "https://github.com/saswatmeher/remote-file-explorer",
   "engines": {
-    "vscode": "^1.37.0"
+    "vscode": "^1.63.0"
   },
   "categories": [
     "Other"
