@@ -69,13 +69,13 @@ export function showFileExplorerPanel(folderPath: string, extensionUri: vscode.U
                 
                 // Get items with thumbnail support
                 const itemNames = fs.readdirSync(newPath);
-                const items = itemNames.map(item => {
+                const items = await Promise.all(itemNames.map(async item => {
                     const itemPath = path.join(newPath, item);
                     const isDirectory = fs.lstatSync(itemPath).isDirectory();
                     
                     let thumbnailUri: string | undefined;
                     if (!isDirectory && supportsThumbnail(itemPath)) {
-                        const thumbUri = getThumbnailUri(itemPath, panel.webview);
+                        const thumbUri = await getThumbnailUri(itemPath, panel.webview);
                         if (thumbUri) {
                             thumbnailUri = thumbUri.toString();
                         }
@@ -87,7 +87,7 @@ export function showFileExplorerPanel(folderPath: string, extensionUri: vscode.U
                         fullPath: itemPath,
                         thumbnailUri
                     };
-                });
+                }));
                 
                 panel.title = `Remote File Explorer: ${path.basename(newPath)}`;
                 panel.webview.html = getWebviewContent(items, panel.webview, extensionUri);

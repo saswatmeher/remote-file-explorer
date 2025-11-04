@@ -5,6 +5,22 @@ All notable changes to the Remote File Explorer extension will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2025-11-04 (Pre-release)
+
+### Added
+- Thumbnail previews:
+  - Images (jpg, jpeg, png, gif, bmp, webp, svg) shown directly in the webview
+  - PDFs display a lightweight SVG preview (shows PDF version and file size)
+- Grid view names now wrap up to 3 lines with an ellipsis at the end
+
+### Changed
+- Removed native `canvas` dependency to avoid GLIBC/snap compatibility issues
+- Thumbnails implemented with a dependency‑free approach (webview URIs + SVG)
+- Dynamically update webview `localResourceRoots` as you navigate, enabling image access
+
+### Fixed
+- Extension activation failure on systems with mismatched `librsvg`/Pango/GLIBC
+
 ## [0.2.0] - 2025-11-03 (Pre-release)
 
 ### Added

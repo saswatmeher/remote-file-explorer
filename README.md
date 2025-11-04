@@ -14,11 +14,19 @@ I just clicked Accept Suggestion with conviction.
 
 - Grid and list views for browsing files and folders
 - Zoom controls (increase/decrease thumbnail size)
+- Color‑coded file type icons (inline SVGs, no external fonts)
+- Thumbnails:
+  - Images (jpg, jpeg, png, gif, bmp, webp, svg) shown as live previews
+  - PDFs show a lightweight SVG preview (version + size)
 - Double-click behavior:
 	- Double-click a folder: opens in the same webview panel
 	- Shift + double-click a folder: opens in a new panel/tab
 - Back / Forward / Up navigation with history tracking
 - Open files in the main editor from the webview
+
+### Name wrapping (grid view)
+- File/folder names wrap up to 3 lines and then ellipsis (…) is applied.
+- List view keeps single‑line names with ellipsis for compactness.
 
 ## Commands
 
@@ -33,11 +41,16 @@ The extension exposes these commands (use the Command Palette or bind keys):
 These features are planned for future releases:
 
 ### High Priority
-- **Thumbnail Support**
-  - Implement FreeDesktop thumbnail specifications
-  - Generate thumbnails for images, PDFs, and videos
-  - Cache thumbnails according to freedesktop.org guidelines
-  - Support both normal and large thumbnail sizes
+- **Better Thumbnailing**
+  - True raster thumbnails (e.g., first‑page PDF preview) while staying cross‑platform
+  - Explore canvas or alternative approaches (e.g., pdf.js, WASM image/PDF renderers)
+  - Optional caching aligned with FreeDesktop.org specs (`~/.cache/thumbnails/…`)
+  - Consider video thumbnails (ffmpeg/wasm based) behind a setting
+
+### Notes on current implementation
+- No native dependencies. Images are served directly via webview URIs.
+- PDF thumbnails are SVG previews (metadata‑based), not rendered pages—keeps the
+  extension portable and avoids GLIBC/snap incompatibilities for now.
 
 ### Nice to Have
 - Drag and drop support between panels
